@@ -5,6 +5,8 @@ import Link from "next/link";
 const Home = () => {
   const [task, settask] = useState("");
   const [tasks, settasks] = useState([]);
+  const [theme, settheme] = useState("black");
+  const themeoptions = ["neonstyle", "root", "black", "light"];
   const handlesubmit = async (e) => {
     e.preventDefault();
     await postdata(task);
@@ -35,53 +37,81 @@ const Home = () => {
 
   const handledelete = async (unitask) => {
     await axios.delete(`api/taskchange?id=${unitask?._id}`);
-
     await fetchdata();
   };
   const handlecomplete = async (unitask) => {
-    //await axios.put(`api/handlestate?id=${unitask?._id}`);
-    console.log("this is temporary");
+    await axios.patch(`api/handlestate/${unitask?._id}`);
+    await fetchdata();
   };
   useEffect(() => {
     fetchdata();
   }, []);
 
   return (
-    <div className="w-screen p-10">
+    <div className={`w-full p-10 bg-background  ${theme}`}>
+      <div className="h-14  m-10 flex justify-end">
+        {themeoptions.map((th) => {
+          return (
+            <button
+              key={th}
+              className=" w-32 mr-5 text-textcolor p-2 bg-primary rounded-full"
+              onClick={() => {
+                console.log(th);
+                settheme(th);
+              }}
+            >
+              {th}
+            </button>
+          );
+        })}
+      </div>
       <form
-        className="flex w-screen items-center justify-center"
+        className="flex w-full items-center justify-center border-2 border-secondary"
         onSubmit={handlesubmit}
       >
         <input
           name="tasktext"
           placeholder="Enter task here "
-          className="bg-purple-800 rounded-full items-center flex h-10 p-2 m-10"
+          className="bg-primary text-textcolor rounded-l-xl items-center flex h-15 p-2 m-2 w-1/2 "
           value={task}
           onChange={(e) => {
             settask(e.target.value);
           }}
         ></input>
-        <button type="submit">Add Task</button>
+        <button
+          className="h-15 bg-primary text-textcolor rounded-r-xl p-3"
+          type="submit"
+        >
+          Add Task
+        </button>
       </form>
-      <div className="grid grid-cols-2 ">
+      <div className="grid grid-cols-2 gap-x-16 px-32">
         {tasks.map((unitask, index) => {
           return (
-            <div key={index} className=" p-2 m-2 bg-green-900 rounded-xl ">
-              <div className="flex w-full">
-                <p className="h-20 w-full flex items-center truncate ">
+            <div
+              key={index}
+              className=" p-2 m-2 bg-primary text-textcolor rounded-xl "
+            >
+              <div className=" w-full">
+                <p
+                  className={`h-20 w-full flex items-center overflow-auto ${
+                    unitask.state ? "line-through" : ""
+                  }`}
+                >
                   {unitask?.tasktopic}
                 </p>
-                <div className=" flex justify-end w-full">
-                  <Link href={`/editpage?id=${unitask._id}`}>
-                    <button className="bg-blue-600 rounded-full w-30 p-5 m-2   hover:bg-blue-800 focus:outline-1">
-                      edit
-                    </button>
+                <div className=" grid grid-cols-3 gap-x-4 w-full">
+                  <Link
+                    className="bg-editbutton rounded-full  p-5 m-2   hover:bg-blue-950 focus:outline-1"
+                    href={`/editpage?id=${unitask._id}`}
+                  >
+                    <button className="w-full h-full">edit</button>
                   </Link>
                   <button
                     onClick={() => {
                       handledelete(unitask);
                     }}
-                    className="bg-red-600 rounded-full w-30 p-5 m-2 hover:bg-red-800 focus:outline-1 "
+                    className="bg-deletebutton rounded-full p-5 m-2 hover:bg-red-950 focus:outline-1 "
                   >
                     delete
                   </button>
@@ -89,7 +119,7 @@ const Home = () => {
                     onClick={() => {
                       handlecomplete(unitask);
                     }}
-                    className="bg-green-600 rounded-full w-30 p-5 m-2  hover:bg-green-800 focus:outline-1 hover:"
+                    className="bg-completebutton rounded-full  p-5 m-2  hover:bg-green-950 focus:outline-1 hover:"
                   >
                     completed
                   </button>

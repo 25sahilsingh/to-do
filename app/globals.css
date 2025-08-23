@@ -1,26 +1,48 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme inline{
+  --color-primary:var(--primary-base);
+  --color-secondary:var(--secondary-base);
+  --color-textcolor:var(--textcolor-base);
+  --color-editbutton:var(--editbutton-base);
+  --color-deletebutton:var(--deletebutton-base);
+  --color-completebutton:var(--completebutton-base);
+  --color-background:var(--background-base);
 }
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base{
+  :root{
+    --background-base:#000000;
+    --primary-base:#292524;
+    --secondary-base:#ffffff;
+    --textcolor-base:#ffffff;
+    --editbutton-base:#1e3a8a;
+    --deletebutton-base:#7f1d1d;
+    --completebutton-base:#14532d;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  .neonstyle{
+    --background-base:#fffb00;
+    --primary-base:#33ff00;
+    --secondary-base:#ffffff;
+    --textcolor-base:#ffffff;
+    --editbutton-base:#2f00ff;
+    --deletebutton-base:#ff0000;
+    --completebutton-base:#00ff66;
+  }
+  .black{
+    --background-base:#000000;
+    --primary-base:#1f2937;
+    --secondary-base:#e5e7eb;
+    --textcolor-base:#e5e7eb;
+    --editbutton-base:#1e3a8a;
+    --deletebutton-base:#7f1d1d;
+    --completebutton-base:#14532d;
+  }
+  .light{
+    --background-base:#ffffff;
+    --primary-base:#e7e7e7;
+    --secondary-base:#000000;
+    --textcolor-base:#000000;
+    --editbutton-base:#376bfc;
+    --deletebutton-base:#fa3a3a;
+    --completebutton-base:#3af886;
+  }
 }
