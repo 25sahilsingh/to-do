@@ -10,11 +10,9 @@ export async function GET(req, { params }) {
   return NextResponse.json(fetchdata);
 }
 export async function PUT(req, { params }) {
-  console.log("reached");
   const { id } = await params;
   const newdata = await req.json();
-  console.log("id", id);
-  console.log("new data", newdata);
+
   const updateddata = await Taskdetail.findByIdAndUpdate(id, newdata);
   console.log("console from routejs", updateddata);
   return NextResponse.json(updateddata);

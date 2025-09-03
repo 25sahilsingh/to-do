@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import 'tailwind-scrollbar-hide/v4';
 @theme inline{
   --color-primary:var(--primary-base);
   --color-secondary:var(--secondary-base);
@@ -7,42 +8,63 @@
   --color-deletebutton:var(--deletebutton-base);
   --color-completebutton:var(--completebutton-base);
   --color-background:var(--background-base);
+  --color-deletebutton-hover:var(--deletebutton-hover);
+  --color-completebutton-hover:var(--completebutton-hover);
+  --color-editbutton-hover:var(--editbutton-hover);
+  --color-primary-hover:var(--primary-hover)
 }
 @layer base{
   :root{
     --background-base:#000000;
     --primary-base:#292524;
+    --primary-hover:#3a3433;
     --secondary-base:#ffffff;
     --textcolor-base:#ffffff;
     --editbutton-base:#1e3a8a;
     --deletebutton-base:#7f1d1d;
     --completebutton-base:#14532d;
+    --editbutton-hover:#376bfc;
+    --deletebutton-hover:#fa3a3a;
+    --completebutton-hover:#3af886;
   }
   .neonstyle{
     --background-base:#fffb00;
     --primary-base:#33ff00;
+    --primary-hover:#2de200;
     --secondary-base:#ffffff;
     --textcolor-base:#ffffff;
     --editbutton-base:#2f00ff;
-    --deletebutton-base:#ff0000;
+    --deletebutton-base:#ff0000;  
     --completebutton-base:#00ff66;
+    --editbutton-hover:#2b53c2;
+    --deletebutton-hover:#ad2626;
+    --completebutton-hover:#269e56;
   }
   .black{
     --background-base:#000000;
     --primary-base:#1f2937;
+    --primary-hover:#253041;
     --secondary-base:#e5e7eb;
     --textcolor-base:#e5e7eb;
     --editbutton-base:#1e3a8a;
     --deletebutton-base:#7f1d1d;
     --completebutton-base:#14532d;
+    --editbutton-hover:#2c56ca;
+    --deletebutton-hover:#ce2f2f;
+    --completebutton-hover:#2cc76a;
   }
   .light{
     --background-base:#ffffff;
     --primary-base:#e7e7e7;
+    --primary-hover:#f0f0f0;
     --secondary-base:#000000;
     --textcolor-base:#000000;
     --editbutton-base:#376bfc;
     --deletebutton-base:#fa3a3a;
     --completebutton-base:#3af886;
+    --editbutton-hover:#3263eb;
+    --deletebutton-hover:#e63838;
+    --completebutton-hover:#38e97f;
+  
   }
 }

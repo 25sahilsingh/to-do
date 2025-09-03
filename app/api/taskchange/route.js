@@ -3,8 +3,16 @@ import { Taskdetail } from "@/model/task";
 import { NextResponse } from "next/server";
 
 await dbconnect();
-export async function GET() {
-  const fetchdata = await Taskdetail.find();
+export async function GET(request) {
+  let fetchdata;
+  const Search = request.nextUrl.searchParams.get("Search");
+  if (Search) {
+    fetchdata = await Taskdetail.find({
+      tasktopic: { $regex: Search, $options: "i" },
+    });
+  } else {
+    fetchdata = await Taskdetail.find();
+  }
   return NextResponse.json(fetchdata);
 }
 export async function POST(request) {
@@ -13,7 +21,6 @@ export async function POST(request) {
     console.log("data:", data);
     const task = new Taskdetail(data);
     await task.save();
-    console.log(data);
     return NextResponse.json(data);
   } catch (error) {
     console.log("this is error:", error);
