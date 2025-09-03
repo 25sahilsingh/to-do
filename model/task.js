@@ -4,6 +4,8 @@ const taskmodel = new Schema({
   desc: String,
   logo: String,
   state: Boolean,
+  iscountdown: Boolean,
+  timer: Number,
 });
 export const Taskdetail =
   mongoose.models?.Taskdetail || mongoose.model("Taskdetail", taskmodel);
