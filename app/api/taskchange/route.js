@@ -18,13 +18,13 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const data = await request.json();
-    console.log("data:", data);
     const task = new Taskdetail(data);
     await task.save();
-    return NextResponse.json(data);
+    return NextResponse.json({ taskid: task._id });
   } catch (error) {
     console.log("this is error:", error);
   }
+  NextResponse.json({ message: "post succesfully posted" });
 }
 
 export async function DELETE(request) {

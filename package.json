@@ -17,6 +17,7 @@
     "tailwind-scrollbar-hide": "^4.0.0"
   },
   "devDependencies": {
+    "@gradio/client": "^1.17.1",
     "@tailwindcss/postcss": "^4",
     "tailwindcss": "^4"
   }
