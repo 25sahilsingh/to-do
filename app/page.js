@@ -3,35 +3,50 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import Addtask from "./components/Addtask";
+import Image from "next/image";
 const Home = () => {
   const [Search, setSearch] = useState("");
   const [tasks, settasks] = useState([]);
   const [theme, settheme] = useState("light");
   const themeoptions = ["neonstyle", "root", "black", "light"];
-  const tempobj = useRef({});
+  const timerrunningobject = useRef({});
+  const alarmelement = useRef();
   const [addtaskvisible, setaddtaskvisible] = useState(false);
   const handlestartstop = async (unitask) => {
-    if (!Object.keys(tempobj.current).includes(unitask._id)) {
-      tempobj.current[unitask._id] = setInterval(() => {
+    if (unitask.timer == 0) {
+      handlecomplete(unitask);
+    }
+    if (!Object.keys(timerrunningobject.current).includes(unitask._id)) {
+      timerrunningobject.current[unitask._id] = setInterval(() => {
         settasks((prev) => {
           var updated = [];
           prev.map((t) => {
-            updated = [
-              ...updated,
-              t._id === unitask._id ? { ...t, timer: t.timer - 1 } : t,
-            ];
+            let updateddata;
+            if (t._id === unitask._id) {
+              if (unitask.iscountdown) {
+                if (t.timer > 0) {
+                  updateddata = { ...t, timer: t.timer - 1 };
+                } else {
+                  updateddata = t;
+                  alarmelement.current.play();
+                }
+              } else {
+                updateddata = { ...t, timer: t.timer + 1 };
+              }
+            } else {
+              updateddata = t;
+            }
+            updated = [...updated, updateddata];
           });
           return updated;
         });
       }, 1000);
     } else {
-      clearInterval(tempobj.current[unitask._id]);
-      delete tempobj.current[unitask._id];
-
-      const data = await axios.patch(
-        `/api/handletimer/${unitask._id}`,
-        unitask.timer
-      );
+      clearInterval(timerrunningobject.current[unitask._id]);
+      delete timerrunningobject.current[unitask._id];
+      const data = await axios.patch(`/api/handletimer/${unitask._id}`, {
+        data: unitask.timer,
+      });
     }
   };
   const handlerefresh = async () => {
@@ -63,6 +78,12 @@ const Home = () => {
   }, []);
   return (
     <div className={`min-h-screen p-10 bg-background ${theme}`}>
+      <audio
+        ref={alarmelement}
+        id="alarm-sound"
+        src="/beepcontinous.wav"
+        preload="auto"
+      ></audio>
       <div className="h-14  m-10 flex justify-end">
         {themeoptions.map((th) => {
           return (
@@ -127,13 +148,27 @@ const Home = () => {
               <div key={index} className=" m-2">
                 <div className=" p-2 bg-primary text-textcolor rounded-t-xl  hover:scale-110 hover:bg-primary-hover ">
                   <div className=" w-full">
-                    <p
-                      className={`p-2 h-20 w-full  overflow-auto text-2xl ${
-                        unitask.state ? "line-through" : ""
-                      }`}
-                    >
-                      {unitask?.tasktopic}
-                    </p>
+                    <div className="flex h-20 items-center">
+                      <div className=" flex h-full items-center">
+                        <Image
+                          className="rounded-full w-14 h-14"
+                          src={`${
+                            unitask.logo ||
+                            "https://res.cloudinary.com/da92n7ws2/image/upload/v1757495582/561f0033-67a2-41df-96f8-440788337e65_jogjtj.jpg"
+                          }`}
+                          alt="logo"
+                          width={50}
+                          height={50}
+                        />
+                      </div>
+                      <p
+                        className={`flex items-center p-2 h-full w-full  overflow-auto text-2xl ${
+                          unitask.state ? "line-through" : ""
+                        }`}
+                      >
+                        {unitask?.tasktopic}
+                      </p>
+                    </div>
                     <p>{unitask.desc}</p>
                     <div className=" grid grid-cols-3 gap-x-4 w-full">
                       <Link

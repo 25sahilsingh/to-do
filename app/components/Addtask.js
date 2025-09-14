@@ -1,20 +1,36 @@
 "use client";
-
 import axios from "axios";
-import { useRef, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 const Addtask = ({ handlerefresh }) => {
   const [task, settask] = useState("");
   const [imagelink, setimagelink] = useState("");
   const [time, settime] = useState("");
   const [description, setdescription] = useState("");
   const [istimer, setistimer] = useState(true);
+  const [prevtaskinfo, setprevtaskinfo] = useState({});
   const timerselector = useRef(true);
+  useEffect(() => {
+    const handleimagegeneration = async () => {
+      const { data } = await axios.post("/api/imagegeneration/", {
+        task: prevtaskinfo.task,
+      });
+
+      const changeimage = await axios.patch(
+        `/api/imagegeneration/${prevtaskinfo.taskid}`,
+        data
+      );
+      handlerefresh();
+      setprevtaskinfo({});
+    };
+
+    if (prevtaskinfo.task) {
+      handleimagegeneration();
+    }
+  }, [prevtaskinfo]);
 
   const handlesubmit = async (e) => {
-    console.log("inside");
     e.preventDefault();
-    await axios.post("/api/taskchange/", {
+    const { data } = await axios.post("/api/taskchange/", {
       tasktopic: task,
       desc: description,
       logo: imagelink,
@@ -22,6 +38,7 @@ const Addtask = ({ handlerefresh }) => {
       timer: time,
       iscountdown: istimer,
     });
+    setprevtaskinfo({ taskid: data.taskid, task: task });
     handlerefresh();
     settask("");
     setimagelink("");
@@ -30,7 +47,7 @@ const Addtask = ({ handlerefresh }) => {
     setistimer(true);
   };
   return (
-    <form onSubmit={handlesubmit} className="w-full">
+    <form onSubmit={handlesubmit} className="w-full text-secondary">
       <div className="flex bg-primary rounded-2xl p-2 m-2">
         <p className="m-2 w-28">Task:</p>
         <input
@@ -64,7 +81,7 @@ const Addtask = ({ handlerefresh }) => {
           placeholder="Enter Image"
         ></input>
 
-        <div className="inline-flex rounded-xl border border-gray-300 bg-white">
+        <div className="inline-flex rounded-xl border border-gray-300 bg-primary">
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -83,13 +100,14 @@ const Addtask = ({ handlerefresh }) => {
             onClick={(e) => {
               e.preventDefault();
               timerselector.current.classList.add("invisible");
+              settime("");
 
               setistimer(false);
             }}
             className={`px-4 py-2 w-28 rounded-xl transition ${
               !istimer
                 ? "bg-blue-500 text-white"
-                : "text-gray-700 hover:bg-gray-100"
+                : " text-gray-700 hover:bg-gray-100"
             }`}
           >
             Stopwatch
@@ -101,7 +119,7 @@ const Addtask = ({ handlerefresh }) => {
             onChange={(e) => {
               settime(e.target.value);
             }}
-            className="bg-pink-50"
+            className="bg-primary"
             value={time}
             type="number"
             placeholder="Enter Time "
