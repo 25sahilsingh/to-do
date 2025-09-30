@@ -24,12 +24,5 @@ export async function POST(request) {
   } catch (error) {
     console.log("this is error:", error);
   }
-  NextResponse.json({ message: "post succesfully posted" });
-}
-
-export async function DELETE(request) {
-  const id = request.nextUrl.searchParams.get("id");
-  console.log("id", id);
-  await Taskdetail.findByIdAndDelete(id);
-  return NextResponse.json({ message: "topic is deleted" }, { status: 200 });
+  return NextResponse.json({ message: "post succesfully posted" });
 }

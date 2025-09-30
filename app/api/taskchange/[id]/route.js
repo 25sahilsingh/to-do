@@ -14,6 +14,14 @@ export async function PUT(req, { params }) {
   const newdata = await req.json();
 
   const updateddata = await Taskdetail.findByIdAndUpdate(id, newdata);
-  console.log("console from routejs", updateddata);
   return NextResponse.json(updateddata);
+}
+export async function DELETE(req, { params }) {
+  const { id } = await params;
+  const temp = JSON.parse(id);
+  for (let i of temp) {
+    console.log(i);
+    await Taskdetail.findByIdAndDelete(i);
+  }
+  return NextResponse.json({ message: "topic is deleted" }, { status: 200 });
 }
