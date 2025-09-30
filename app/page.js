@@ -4,14 +4,17 @@ import axios from "axios";
 import Link from "next/link";
 import Addtask from "./components/Addtask";
 import Image from "next/image";
+
 const Home = () => {
   const [Search, setSearch] = useState("");
   const [tasks, settasks] = useState([]);
   const [theme, settheme] = useState("light");
+  const [selectedtaskid, setselectedtaskid] = useState([]);
   const themeoptions = ["neonstyle", "root", "black", "light"];
   const timerrunningobject = useRef({});
   const alarmelement = useRef();
   const [addtaskvisible, setaddtaskvisible] = useState(false);
+
   const handlestartstop = async (unitask) => {
     if (unitask.timer == 0) {
       handlecomplete(unitask);
@@ -49,9 +52,11 @@ const Home = () => {
       });
     }
   };
+
   const handlerefresh = async () => {
     await fetchdata();
   };
+
   const fetchdata = async () => {
     try {
       const fetcheddata = await axios.get(`api/taskchange/?Search=${Search}`);
@@ -61,21 +66,26 @@ const Home = () => {
     }
   };
 
-  const handledelete = async (unitask) => {
-    await axios.delete(`api/taskchange?id=${unitask?._id}`);
+  const handledelete = async () => {
+    await axios.delete(`api/taskchange/${JSON.stringify(selectedtaskid)}`);
     await fetchdata();
   };
+
   const handlesearch = async (e) => {
     e.preventDefault();
     await fetchdata();
   };
-  const handlecomplete = async (unitask) => {
-    await axios.patch(`api/handlestate/${unitask?._id}`);
+
+  const handlecomplete = async () => {
+    await axios.patch(`api/handlestate/${JSON.stringify(selectedtaskid)}`);
     await fetchdata();
+    setselectedtaskid([]);
   };
+
   useEffect(() => {
     fetchdata();
   }, []);
+
   return (
     <div className={`min-h-screen p-10 bg-background ${theme}`}>
       <audio
@@ -84,7 +94,7 @@ const Home = () => {
         src="/beepcontinous.wav"
         preload="auto"
       ></audio>
-      <div className="h-14  m-10 flex justify-end">
+      <div className="h-14  m-2 flex justify-end">
         {themeoptions.map((th) => {
           return (
             <button
@@ -134,6 +144,20 @@ const Home = () => {
 
           {addtaskvisible && <Addtask handlerefresh={handlerefresh} />}
         </div>
+        <div className="flex justify-end w-full px-32 h-20">
+          <button
+            onClick={handledelete}
+            className="rounded-3xl w-36 p-2 m-2 bg-deletebutton hover:bg-deletebutton-hover"
+          >
+            DELETE
+          </button>
+          <button
+            onClick={handlecomplete}
+            className="rounded-3xl w-36 p-2 m-2 bg-completebutton hover:bg-completebutton-hover"
+          >
+            COMPLETE
+          </button>
+        </div>
         <div className="grid grid-cols-2 gap-x-16 px-32">
           {tasks.map((unitask, index) => {
             const hrs = Math.floor(unitask.timer / 3600);
@@ -145,13 +169,32 @@ const Home = () => {
             const ss = String(sec).padStart(2, "0");
             const formattedtime = `${hh}:${mm}:${ss}`;
             return (
-              <div key={index} className=" m-2">
-                <div className=" p-2 bg-primary text-textcolor rounded-t-xl  hover:scale-110 hover:bg-primary-hover ">
-                  <div className=" w-full">
-                    <div className="flex h-20 items-center">
-                      <div className=" flex h-full items-center">
+              <div key={index} className="m-2 h-72">
+                <input
+                  className="peer hidden"
+                  id={`selectCheckbox-${unitask._id}`}
+                  type="checkbox"
+                  checked={selectedtaskid.includes(unitask._id)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setselectedtaskid((prev) => [...prev, unitask._id]);
+                    } else {
+                      setselectedtaskid((prev) =>
+                        prev.filter((t) => t !== unitask._id)
+                      );
+                    }
+                    console.log(selectedtaskid);
+                  }}
+                />
+                <label
+                  htmlFor={`selectCheckbox-${unitask._id}`}
+                  className="block h-full  rounded-2xl overflow-hidden peer-checked:outline-blue-600 peer-checked:outline-4"
+                >
+                  <div className="p-2 bg-primary text-textcolor hover:scale-102 hover:bg-primary-hover h-3/4">
+                    <div className="flex h-1/4 items-center">
+                      <div className="flex h-full items-center">
                         <Image
-                          className="rounded-full w-14 h-14"
+                          className="rounded-full w-11 h-11"
                           src={`${
                             unitask.logo ||
                             "https://res.cloudinary.com/da92n7ws2/image/upload/v1757495582/561f0033-67a2-41df-96f8-440788337e65_jogjtj.jpg"
@@ -162,57 +205,39 @@ const Home = () => {
                         />
                       </div>
                       <p
-                        className={`flex items-center p-2 h-full w-full  overflow-auto text-2xl ${
+                        className={`flex items-center p-2 w-full overflow-hidden text-2xl ${
                           unitask.state ? "line-through" : ""
                         }`}
                       >
                         {unitask?.tasktopic}
                       </p>
                     </div>
-                    <p>{unitask.desc}</p>
-                    <div className=" grid grid-cols-3 gap-x-4 w-full">
-                      <Link
-                        className="bg-editbutton rounded-full  p-5 m-2   hover:bg-editbutton-hover focus:outline-1 shadow-md shadow-secondary"
-                        href={`/editpage?id=${unitask._id}`}
-                      >
-                        <button className="w-full h-full">edit</button>
-                      </Link>
+                    <p
+                      className={`whitespace-pre-line h-3/4 overflow-auto ${
+                        unitask.state ? "line-through" : ""
+                      }`}
+                    >
+                      {unitask.desc}
+                    </p>
+                  </div>
+                  <div className="mt-1 h-1/4 flex w-full bg-primary p-2 text-xl items-center">
+                    <div className="flex text-secondary">
+                      <div>{`${hh}:`}</div>
+                      <div>{`${mm}:`}</div>
+                      <div>{`${ss}`}</div>
+                    </div>
+                    <div className="w-full justify-end flex">
                       <button
+                        className="p-2 bg-deletebutton hover:bg-deletebutton-hover rounded-2xl"
                         onClick={() => {
-                          handledelete(unitask);
+                          handlestartstop(unitask);
                         }}
-                        className="bg-deletebutton rounded-full p-5 m-2 hover:bg-deletebutton-hover focus:outline-1 shadow-md shadow-secondary"
                       >
-                        delete
-                      </button>
-                      <button
-                        onClick={() => {
-                          handlecomplete(unitask);
-                        }}
-                        className="bg-completebutton rounded-full  p-5 m-2  hover:bg-completebutton-hover focus:outline-1 shadow-md shadow-secondary"
-                      >
-                        completed
+                        start/stop
                       </button>
                     </div>
                   </div>
-                </div>
-                <div className="mt-1 flex w-full rounded-b-xl bg-primary p-2 text-xl items-center ">
-                  <div className="flex text-secondary">
-                    <div>{`${hh}:`}</div>
-                    <div>{`${mm}:`}</div>
-                    <div>{`${ss}`}</div>
-                  </div>
-                  <div className=" w-full justify-end flex">
-                    <button
-                      className="p-2 bg-deletebutton hover:bg-deletebutton-hover rounded-2xl" //make color name change
-                      onClick={() => {
-                        handlestartstop(unitask);
-                      }}
-                    >
-                      start/stop
-                    </button>
-                  </div>
-                </div>
+                </label>
               </div>
             );
           })}
@@ -221,4 +246,5 @@ const Home = () => {
     </div>
   );
 };
+
 export default Home;
