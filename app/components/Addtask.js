@@ -1,6 +1,7 @@
 "use client";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
+
 const Addtask = ({ handlerefresh }) => {
   const [task, settask] = useState("");
   const [imagelink, setimagelink] = useState("");
@@ -11,20 +12,43 @@ const Addtask = ({ handlerefresh }) => {
   const timerselector = useRef(true);
   useEffect(() => {
     const handleimagegeneration = async () => {
-      const { data } = await axios.post("/api/imagegeneration/", {
-        task: prevtaskinfo.task,
-      });
-
-      const changeimage = await axios.patch(
-        `/api/imagegeneration/${prevtaskinfo.taskid}`,
-        data
-      );
-      handlerefresh();
-      setprevtaskinfo({});
+      if (!prevtaskinfo.imagelink) {
+        const { data } = await axios.post("/api/ai/imagegeneration/", {
+          task: prevtaskinfo.task,
+        });
+        return data;
+      }
+      return prevtaskinfo.imagelink;
     };
-
+    const handle_description_generation = async () => {
+      if (!prevtaskinfo.description) {
+        console.log("thi is previous description", prevtaskinfo.description);
+        const { data } = await axios.post(
+          "/api/ai/handle_description_generation/",
+          {
+            task: prevtaskinfo.task,
+          },
+          { timeout: 40 * 60 * 1000 }
+        );
+        return data;
+      }
+      return prevtaskinfo.description;
+    };
     if (prevtaskinfo.task) {
-      handleimagegeneration();
+      const handleai = async () => {
+        const [imageurl, taskdescription] = await Promise.all([
+          handleimagegeneration(),
+          handle_description_generation(),
+        ]);
+        const changedata = await axios.patch(
+          `/api/ai/handlepatch/${prevtaskinfo.taskid}`,
+          { imageurl, taskdescription }
+        );
+        console.log("changedata", changedata);
+        handlerefresh();
+        setprevtaskinfo({});
+      };
+      handleai();
     }
   }, [prevtaskinfo]);
 
@@ -38,7 +62,12 @@ const Addtask = ({ handlerefresh }) => {
       timer: time,
       iscountdown: istimer,
     });
-    setprevtaskinfo({ taskid: data.taskid, task: task });
+    setprevtaskinfo({
+      taskid: data.taskid,
+      task: task,
+      description: description,
+      imagelink: imagelink,
+    });
     handlerefresh();
     settask("");
     setimagelink("");
