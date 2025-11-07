@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import Link from "next/link";
+import SuggestionAi from "./components/SuggestionAi";
 import Addtask from "./components/Addtask";
 import Image from "next/image";
 
@@ -14,6 +14,10 @@ const Home = () => {
   const timerrunningobject = useRef({});
   const alarmelement = useRef();
   const [addtaskvisible, setaddtaskvisible] = useState(false);
+  const [addsuggestionaivisible, setaddsuggestionaivisible] = useState(false);
+  const [suggestai, setsuggestai] = useState(
+    "loreLorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc,m50"
+  );
 
   const handlestartstop = async (unitask) => {
     if (unitask.timer == 0) {
@@ -86,6 +90,22 @@ const Home = () => {
     fetchdata();
   }, []);
 
+  useEffect(() => {
+    if (tasks.length > 0) {
+      const suggestai = async () => {
+        try {
+          const { data } = await axios.post(`/api/ai/handlesuggestai`, {
+            task: tasks.map((e) => e.tasktopic),
+          });
+          setsuggestai(data.suggestion);
+        } catch (error) {
+          console.error("AI suggestion error:", error);
+        }
+      };
+      suggestai();
+    }
+  }, [tasks]);
+
   return (
     <div className={`min-h-screen p-10 bg-background ${theme}`}>
       <audio
@@ -110,11 +130,11 @@ const Home = () => {
           );
         })}
       </div>
-      <div className="p-10">
+      <div className="p-4">
         <div className="flex flex-col justify-center items-center w-2/3 mx-auto">
           <form
-            className="flex w-full items-center justify-center mb-10 "
-            onSubmit={handlesearch}
+            className="flex w-full items-center justify-center mb-4 "
+            onChange={handlesearch}
           >
             <input
               name="searchtext"
@@ -140,10 +160,23 @@ const Home = () => {
             >
               Add Task
             </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setaddsuggestionaivisible((prev) => !prev);
+              }}
+              className="ml-10 h-15 bg-primary text-textcolor rounded-xl p-3"
+            >
+              Suggest Task
+            </button>
           </form>
 
           {addtaskvisible && <Addtask handlerefresh={handlerefresh} />}
+          {addsuggestionaivisible && (
+            <SuggestionAi suggestion={suggestai}></SuggestionAi>
+          )}
         </div>
+
         <div className="flex justify-end w-full px-32 h-20">
           <button
             onClick={handledelete}
