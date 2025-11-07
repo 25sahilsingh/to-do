@@ -54,6 +54,7 @@ const Addtask = ({ handlerefresh }) => {
 
   const handlesubmit = async (e) => {
     e.preventDefault();
+    handlerefresh();
     const { data } = await axios.post("/api/taskchange/", {
       tasktopic: task,
       desc: description,
@@ -68,7 +69,6 @@ const Addtask = ({ handlerefresh }) => {
       description: description,
       imagelink: imagelink,
     });
-    handlerefresh();
     settask("");
     setimagelink("");
     settime("");
