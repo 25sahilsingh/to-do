@@ -2,7 +2,7 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 
-const Addtask = ({ handlerefresh }) => {
+const Addtask = ({ handlerefresh, handleaddtask }) => {
   const [task, settask] = useState("");
   const [imagelink, setimagelink] = useState("");
   const [time, settime] = useState("");
@@ -54,8 +54,15 @@ const Addtask = ({ handlerefresh }) => {
 
   const handlesubmit = async (e) => {
     e.preventDefault();
-    handlerefresh();
     const { data } = await axios.post("/api/taskchange/", {
+      tasktopic: task,
+      desc: description,
+      logo: imagelink,
+      state: 0,
+      timer: time,
+      iscountdown: istimer,
+    });
+    handleaddtask({
       tasktopic: task,
       desc: description,
       logo: imagelink,

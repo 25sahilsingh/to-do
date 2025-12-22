@@ -16,7 +16,6 @@ const Home = () => {
   const [addtaskvisible, setaddtaskvisible] = useState(false);
   const [addsuggestionaivisible, setaddsuggestionaivisible] = useState(false);
   const [suggestai, setsuggestai] = useState("Loading Suggestion...");
-
   const handlestartstop = async (unitask) => {
     if (unitask.timer == 0) {
       handlecomplete(unitask);
@@ -58,7 +57,9 @@ const Home = () => {
   const handlerefresh = async () => {
     await fetchdata();
   };
-
+  const handleaddtask = (e) => {
+    settasks((prev) => [...prev, e]);
+  };
   const fetchdata = async () => {
     try {
       const fetcheddata = await axios.get(`api/taskchange/?Search=${Search}`);
@@ -69,8 +70,10 @@ const Home = () => {
   };
 
   const handledelete = async () => {
+    console.log("tasks:", tasks);
+    settasks((prev) => prev.filter((t) => !selectedtaskid.includes(t._id)));
     await axios.delete(`api/taskchange/${JSON.stringify(selectedtaskid)}`);
-    await fetchdata();
+    setselectedtaskid([]);
   };
 
   const handlesearch = async (e) => {
@@ -80,7 +83,10 @@ const Home = () => {
 
   const handlecomplete = async () => {
     await axios.patch(`api/handlestate/${JSON.stringify(selectedtaskid)}`);
-    await fetchdata();
+    settasks((prev) =>
+      prev.map((t) => (selectedtaskid.includes(t._id) ? { ...t, state: 1 } : t))
+    );
+    console.log(tasks);
     setselectedtaskid([]);
   };
 
@@ -169,7 +175,12 @@ const Home = () => {
             </button>
           </form>
 
-          {addtaskvisible && <Addtask handlerefresh={handlerefresh} />}
+          {addtaskvisible && (
+            <Addtask
+              handlerefresh={handlerefresh}
+              handleaddtask={handleaddtask}
+            />
+          )}
           {addsuggestionaivisible && (
             <SuggestionAi suggestion={suggestai}></SuggestionAi>
           )}

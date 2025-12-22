@@ -6,7 +6,7 @@ export async function PATCH(req, { params }) {
   const { id } = await params;
   const temp = JSON.parse(id);
   for (let i of temp) {
-    console.log(i);
+    // const data = await Taskdetail.findById(i);if want to flip use !this.state instead of 1
     await Taskdetail.findByIdAndUpdate(i, {
       $set: { state: 1 },
     });
